@@ -1,0 +1,126 @@
+variable "resource_group_name" {}
+variable "netwatcher_rg" {}
+variable "netwatcher_name" {}
+variable "nw_log_analytics_workspace_name" {}
+variable "nw_storage_account" {}
+variable "vhub_resource_group_name" {}
+variable "conn_subscription_id" {}
+variable "mgmt_subscription_id" {}
+variable "vhub_name" {}
+variable "hub_route_name" {}
+variable "hub_route_label" {}
+variable "data_eng_group_name" {}
+variable "cld_infra_group_name" {}
+variable "is_production_or_qa" {}
+variable "app_id" {
+  description = "App ID of the workload - default value"
+  type        = string
+  default     = "00002"
+}
+variable "environment" {}
+variable "applicationName" {}
+variable "env_tag" {}
+variable "costCenter" {}
+variable "applicationOwner" {}
+variable "businessUnit" {}
+variable "disasterRecover" {}
+variable "serviceClass" {}
+variable "dataClass" {}
+variable "supportOwner" {}
+variable "defaultExperience" {}
+variable "hidden-cosmos-mmspecial" {}
+variable "vnet_name" {}
+variable "address_space" {}
+variable "dns_servers" {}
+variable "pe_subnet_name" {}
+variable "intappgtwy_subnet_name" {}
+variable "extappgtwy_subnet_name" {}
+variable "appplan_subnet_name" {}
+variable "apim_subnet_name" {}
+variable "nw_log_location" {}
+variable "common_kv_name" {}
+variable "common_kv_sku_name" {}
+variable "common_kv_soft_delete_retention_days" {}
+variable "common_kv_purge_protection_enabled" {}
+variable "kv_bypass" {}
+variable "common_kv_ip_rules" {}
+variable "dns_resource_group_name" {}
+variable "kv_private_dns_zone_name" {}
+variable "service_kv_name" {}
+variable "service_kv_sku_name" {}
+variable "service_kv_soft_delete_retention_days" {}
+variable "service_kv_purge_protection_enabled" {}
+variable "service_kv_ip_rules" {}
+variable "common_cosmosdb_account_name" {}
+variable "cosmosdb_databases" {}
+variable "cosmosdb_offer_type" {}
+variable "cosmosdb_diagnostics" {}
+variable "cosmosdb_failover_locations" {}
+variable "key_permissions_kv" {}
+variable "secret_permissions_kv" {}
+variable "certificate_permissions_kv" {}
+variable "account_key_permissions_kv" {}
+variable "account_secret_permissions_kv" {}
+variable "account_certificate_permissions_kv" {}
+variable "cmk_configuration" {}
+variable "user_assigned_identity_name" {}
+variable "document_db_private_dns_zone_name" {}
+# variable "pvt_connection_name" {}
+# variable "pvt_connection_rg" {}
+# variable "cmk_name" {}
+# variable "cmk_key_type" {}
+# variable "cmk_key_size" {}
+variable "adf_cmk_expiration_date" {}
+variable "adf_name" {}
+variable "key_vault_linked_service_name" {}
+variable "build_servers_subnet" {}
+variable "shrdsvcmgmt_vnet" {}
+variable "shrdsvcmgmt_resource_group" {}
+# variable "account_configuration" {}
+variable "storage_account_name" {}
+variable "storage_account_tls_version" {}
+variable "akv_managed_storage_account_name" {}
+variable "akv_managed_storage_account_key" {}
+variable "storage_network_rule" {}
+variable "adf_portal_private_dns_zone_name" {}
+variable "adf_private_dns_zone_name" {}
+variable "private_dns_zone_resource_group_name" {}
+variable "cosmosdb_sql_container" {}
+variable "blob_private_dns_zone_name" {}
+variable "blob_name" {}
+variable "log_analytics_destination_type" {}
+# variable "adf_github_configuration" {}
+/*
+variable "adf_commonkv_managed_pe_name" {}
+variable "adf_servicekv_managed_pe_name" {}
+
+variable "kv_managed_pe_subresource_name" {}
+variable "adf_cosmos_managed_pe_name" {}
+variable "cosmos_managed_pe_subresource_name" {}*/
+variable "apim_name" {}
+variable "api_name" {}
+variable "api_is_versioned" {}
+variable "publisher_email" {}
+variable "publisher_name" {}
+variable "sku_name" {}
+variable "content_value" {}
+variable "api-versions" {}
+variable "api_path" {}
+variable "api_service_url" {}
+variable "api_display_name" {}
+
+variable "adf_blob_managed_pe_name" {}
+variable "blob_managed_pe_subresource_name" {}
+
+variable	"functionappname"{}
+variable	"app_service_plan_id"{}
+variable	"user_assigned_identity"{}
+variable	"managed_identities"{}
+variable  "site_config" {}
+variable  "location" {}
+variable "connection_strings" {}
+variable	"plan_name" {}
+variable	"app_service_environment_id" {}
+variable 	"sku_tier" {}
+variable 	"sku_size" {}
+variable "sku_cap" {}
