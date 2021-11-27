@@ -1,0 +1,81 @@
+locals {
+  vnet_config = {
+    vnet = {
+      name          = join("-", [local.app_id, var.vnet_name, local.environment])
+      address_space = [var.address_space, ]
+      dns           = var.dns_servers
+    }
+    specialsubnets = {
+      pe_subnet = {
+        name                                           = lower(join("-", [local.app_id, var.pe_subnet_name, local.environment]))
+        cidr                                           = [cidrsubnet(var.address_space, 4, 2)]
+        service_endpoints                              = []
+        enforce_private_link_endpoint_network_policies = true
+        enforce_private_link_service_network_policies  = true
+      }
+    }
+    subnets = {
+      intappgtwy_subnet = {
+        name              = lower(join("-", [local.app_id, var.intappgtwy_subnet_name, local.environment]))
+        cidr              = [cidrsubnet(var.address_space, 4, 0)]
+        service_endpoints = ["Microsoft.KeyVault", "Microsoft.ServiceBus", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Web", "Microsoft.EventHub", "Microsoft.AzureCosmosDB", "Microsoft.AzureActiveDirectory"]
+        nsg_name          = lower(join("-", [local.app_id, var.intappgtwy_subnet_name, local.environment]))
+      }
+      extappgtwy_subnet = {
+        name              = lower(join("-", [local.app_id, var.extappgtwy_subnet_name, local.environment]))
+        cidr              = [cidrsubnet(var.address_space, 4, 1)]
+        service_endpoints = ["Microsoft.KeyVault", "Microsoft.ServiceBus", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Web", "Microsoft.EventHub", "Microsoft.AzureCosmosDB", "Microsoft.AzureActiveDirectory"]
+        nsg_name          = lower(join("-", [local.app_id, var.extappgtwy_subnet_name, local.environment]))
+      }
+      appplan_subnet = {
+        name              = lower(join("-", [local.app_id, var.appplan_subnet_name, local.environment]))
+        cidr              = [cidrsubnet(var.address_space, 5, 6)]
+        service_endpoints = ["Microsoft.KeyVault", "Microsoft.ServiceBus", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Web", "Microsoft.EventHub", "Microsoft.AzureCosmosDB", "Microsoft.AzureActiveDirectory"]
+        nsg_name          = lower(join("-", [local.app_id, var.appplan_subnet_name, local.environment]))
+      }
+      apim_subnet = {
+        name              = lower(join("-", [local.app_id, var.apim_subnet_name, local.environment]))
+        cidr              = [cidrsubnet(var.address_space, 5, 7)]
+        service_endpoints = ["Microsoft.KeyVault", "Microsoft.ServiceBus", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Web", "Microsoft.EventHub", "Microsoft.AzureCosmosDB", "Microsoft.AzureActiveDirectory"]
+        nsg_name          = lower(join("-", [local.app_id, var.apim_subnet_name, local.environment]))
+      }
+    }
+    diagnostics = {
+      log = [
+        #["Category name",  "Diagnostics Enabled(true/false)", "Retention Enabled(true/false)", Retention_period] 
+        ["VMProtectionAlerts", true, true, 0],
+      ]
+      metric = [
+        #["Category name",  "Diagnostics Enabled(true/false)", "Retention Enabled(true/false)", Retention_period] 
+        ["AllMetrics", true, true, 0],
+      ]
+    }
+  }
+  log_analytics_workspace = {
+    id           = data.azurerm_log_analytics_workspace.nw_log.id
+    workspace_id = data.azurerm_log_analytics_workspace.nw_log.workspace_id
+    location     = var.nw_log_location
+  }
+  diagnostics_map = {
+    vnet_diag_name = format("%s-%s-%s-diag", local.app_id, var.vnet_name, local.environment)
+    diags_sa       = data.azurerm_storage_account.nw_sa.id
+  }
+}
+
+locals {
+  vhub = {
+    name                = local.data.vhub_name
+    resource_group_name = local.data.vhub_resource_group_name
+  }
+  hub_conn = {
+    name                      = lower(join("-", [local.app_id, var.vnet_name, local.environment]))
+    remote_virtual_network_id = module.vnet.vnet.vnet_id
+    routing = {
+      associated_route_table = local.route_table_id.hub_route_table
+      propagated_route_table = {
+        labels          = [var.hub_route_label, ]
+        route_table_ids = [local.route_table_id.hub_route_table, ]
+      }
+    }
+  }
+}
