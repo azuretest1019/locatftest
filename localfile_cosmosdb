@@ -1,0 +1,32 @@
+locals {
+  cosmosdb_account_name = format("a%s-%s-%s", var.app_id, var.common_cosmosdb_account_name, var.environment)
+  collections = flatten([
+    for db_key, db in var.cosmosdb_databases : [
+      for col in db.collections : {
+        name       = col.name
+        database   = db_key
+        shard_key  = col.shard_key
+        throughput = col.throughput
+      }
+    ]
+  ])
+
+  default_failover_locations = {
+    default = {
+      location = data.azurerm_resource_group.rg.location
+    }
+  }
+
+  diag_resource_list = var.cosmosdb_diagnostics != null ? split("/", var.cosmosdb_diagnostics.destination) : []
+  parsed_diag = var.cosmosdb_diagnostics != null ? {
+    log_analytics_id   = contains(local.diag_resource_list, "Microsoft.OperationalInsights") ? var.cosmosdb_diagnostics.destination : null
+    storage_account_id = contains(local.diag_resource_list, "Microsoft.Storage") ? var.cosmosdb_diagnostics.destination : null
+    metric             = var.cosmosdb_diagnostics.metrics
+    log                = var.cosmosdb_diagnostics.logs
+    } : {
+    log_analytics_id   = null
+    storage_account_id = null
+    metric             = []
+    log                = []
+  }
+}
