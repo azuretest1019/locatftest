@@ -1,0 +1,33 @@
+locals {
+  app_id      = var.app_id
+  environment = var.environment
+  tags = {
+    applicationName         = var.applicationName
+    environment             = var.env_tag
+    costCenter              = var.costCenter
+    applicationOwner        = var.applicationOwner
+    businessUnit            = var.businessUnit
+    disasterRecover         = var.disasterRecover
+    serviceClass            = var.serviceClass
+    dataClass               = var.dataClass
+    supportOwner            = var.supportOwner
+    defaultExperience       = var.defaultExperience
+    hidden-cosmos-mmspecial = var.hidden-cosmos-mmspecial
+  }
+}
+
+locals {
+  netwatcher = {
+    name = var.netwatcher_name
+    rg   = var.netwatcher_rg
+  }
+}
+
+locals {
+  pe_network = {
+    resource_group_name = data.azurerm_resource_group.rg.name
+    vnet_name           = module.vnet.vnet_obj.name
+    subnet_name         = module.vnet.vnet_subnets[local.vnet_config.specialsubnets.pe_subnet.name]
+  }
+}
+
