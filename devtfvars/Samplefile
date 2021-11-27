@@ -1,0 +1,173 @@
+#resource_group_name                   = "00002-rg-dev"
+resource_group_name                   = "rg"
+netwatcher_rg                         = "core-netlog-dev"
+netwatcher_name                       = "core-watch-dev"
+nw_log_analytics_workspace_name       = "core-loggr-dev"
+nw_storage_account                    = "coremgmtst1dev"
+vhub_resource_group_name              = "core-netwrk-dev"
+conn_subscription_id                  = "fb572f9f-7e52-448d-918c-bb98ce9b743e"
+mgmt_subscription_id                  = "5efbbb60-3241-492e-a125-47d13e025aa2"
+vhub_name                             = "core-vhub01-dev"
+hub_route_name                        = "core-hubrt1-dev"
+hub_route_label                       = "hub_route"
+data_eng_group_name                   = "crg-dataengadmin-dev"
+cld_infra_group_name                  = "crg-cldinfraeng-glb"
+is_production_or_qa                   = false
+environment                           = "dev"
+applicationName                       = "Activity Hub"
+env_tag                               = "Development Activity Hub"
+costCenter                            = "5049110006"
+applicationOwner                      = "~SBSCloudDataServices@fi.com"
+businessUnit                          = "IT TBS Shared Business Services"
+disasterRecover                       = "Critical"
+serviceClass                          = "Gold"
+dataClass                             = "Sensitive"
+supportOwner                          = "~SBSCloudDataServices@fi.com"
+defaultExperience                     = "Core (SQL)"
+hidden-cosmos-mmspecial               = ""
+vnet_name                             = "ahnet"
+address_space                         = "10.167.4.0/22"
+dns_servers                           = ["10.166.133.4", ]
+pe_subnet_name                        = "privendnet"
+intappgtwy_subnet_name                = "intappgtwy"
+extappgtwy_subnet_name                = "extappgtwy"
+appplan_subnet_name                   = "appservice"
+apim_subnet_name                      = "apim"
+nw_log_location                       = "West US 2"
+certificate_permissions_kv            = ["Get", "List", "Create", "Update", "Delete", "Purge", "Recover"]
+common_kv_name                        = "ahcommon"
+common_kv_sku_name                    = "standard"
+common_kv_soft_delete_retention_days  = 90
+common_kv_purge_protection_enabled    = true
+key_permissions_kv                    = ["Update", "Get", "List", "Delete", "Create", "Purge", "Recover"]
+account_key_permissions_kv            = ["Update", "Get", "List", "delete", "Create", "Purge"]
+account_secret_permissions_kv         = ["Get", "Set", "List", "delete", "Purge"]
+account_certificate_permissions_kv    = ["Get", "List", "Create", "Update", "Delete", "Purge"]
+kv_bypass                             = "AzureServices"
+common_kv_ip_rules                    = []
+dns_resource_group_name               = "core-shrdsvcmgmt-dev"
+kv_private_dns_zone_name              = "privatelink.vaultcore.azure.net"
+document_db_private_dns_zone_name     = "privatelink.documents.azure.com"
+secret_permissions_kv                 = ["Get", "Set", "List", "delete", "Purge", "Recover"]
+service_kv_name                       = "ahsvc"
+service_kv_sku_name                   = "standard"
+service_kv_soft_delete_retention_days = 90
+service_kv_purge_protection_enabled   = true
+service_kv_ip_rules                   = []
+build_servers_subnet                  = "core-shrdsvcbuild-dev"
+shrdsvcmgmt_vnet                      = "core-shrdsvcmgmt-dev"
+shrdsvcmgmt_resource_group            = "core-shrdsvcmgmt-dev"
+common_cosmosdb_account_name          = "ahcosmosdbacct"
+cosmosdb_databases = {
+  mydb1 = {
+    throughput = 400
+    collections = [
+      { name = "col0", shard_key = "somekey_0", throughput = 1000 },
+      { name = "col1", shard_key = "somekey_1", throughput = null },
+    ]
+  }
+  mydb2 = {
+    throughput = 400
+    collections = [
+    { name = "mycol2", shard_key = "someother_key", throughput = null }]
+  }
+}
+cosmosdb_sql_container = {
+  name               = "activity-hub"
+  partition_key_path = "/_partitionKey"
+  indexing_policy = {
+    indexing_mode = "Consistent"
+    included_path = {
+      path = "/*"
+    }
+    excluded_path = {
+      path = "/\"_etag\"/?"
+    }
+  }
+}
+cosmosdb_offer_type = "Standard"
+cosmosdb_diagnostics = {
+  destination = "/subscriptions/5efbbb60-3241-492e-a125-47d13e025aa2/resourceGroups/core-netlog-dev/providers/Microsoft.Storage/storageAccounts/coremgmtst1dev"
+  logs        = ["all"],
+  metrics     = []
+}
+cosmosdb_failover_locations = null
+#This was defined here, but is now being used and defined with "service_kv_name" variable instead of - key_vault_name              = "a00002-ahsvc-dev"
+#This was defined here, but is no longer being used as we are using the same RG for the entire deployment and that is defined elsewhere - key_vault_rg_name           = "00002-rg-dev"
+user_assigned_identity_name = "cdb-uai"
+
+cmk_configuration = {
+  name            = "pcgdmakvcmk"
+  key_type        = "RSA"
+  key_size        = "2048"
+  expiration_date = "2021-10-12T12:00:00Z"
+}
+adf_name                      = "ahadf"
+key_vault_linked_service_name = "ah-kv-ls"
+adf_cmk_expiration_date       = "2023-10-12T12:00:00Z"
+storage_network_rule = {
+  bypass         = ["AzureServices"]
+  default_action = "Deny"
+  ip_rules       = []
+  subnet_ids     = []
+}
+storage_account_name                 = "ahadfblobstadev"
+storage_account_tls_version          = "TLS1_2"
+akv_managed_storage_account_name     = "ahadfblobmanagedsta"
+akv_managed_storage_account_key      = "stakey"
+adf_portal_private_dns_zone_name     = "privatelink.adf.azure.com"
+adf_private_dns_zone_name            = "privatelink.datafactory.azure.net"
+private_dns_zone_resource_group_name = "core-shrdsvcmgmt-dev"
+blob_private_dns_zone_name           = "privatelink.blob.core.windows.net"
+blob_name                            = "ahblob"
+log_analytics_destination_type       = "Dedicated"
+/*adf_github_configuration = {
+  account_name                         = "FisherInvestments"
+  branch_name                          = "release/0.0.1"
+  repository_name                      = "Azure_ActivityHub_ADF"
+  root_folder                          = "/"
+  git_url                              = "https://github.com/FisherInvestments/Azure_ActivityHub_ADF"
+}*/
+
+/*
+adf_commonkv_managed_pe_name              = "ahadfcmkv"
+
+adf_servicekv_managed_pe_name             = "ahadfsrvckv"
+
+kv_managed_pe_subresource_name            = "vault"
+adf_cosmos_managed_pe_name                = "ahadfcosmos"
+cosmos_managed_pe_subresource_name         = "SQL"
+*/
+adf_blob_managed_pe_name                  = "ahadfblob"
+blob_managed_pe_subresource_name          = "blob"
+#####APIMangement#######
+apim_name                   = "ahapimgmt"
+api_display_name            = "AH API Management"
+api_name                    = "apimgmt"
+api_path                    = "apimgmt"
+api_service_url             = "https://tbd/fisher-investments/activity/1.0.0"
+publisher_name               = "fi.com"
+publisher_email = "matluri@fi.com"
+sku_name = "Developer_1"
+content_value = "http://conferenceapi.azurewebsites.net/?format=json"
+api_is_versioned            = false
+api-versions                = []
+
+####App_Plan####
+  plan_name                    = var.plan_name
+  location                   = data.azurerm_resource_group.rg.location
+  resource_group_name        = data.azurerm_resource_group.rg.name
+  kind                       = var.kind
+  app_service_environment_id = var.app_service_environment_id
+  tags                       = local.tags
+
+  sku {
+    tier     = var.sku_tier
+    size     = var.sku_size
+	
+
+
+####App_Function####
+  fucntionappname            = "funcapp"
+  storage_account_name       = var.storage_account_name
+  storage_account_access_key = var.storage_account_access_key
