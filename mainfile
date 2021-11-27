@@ -1,0 +1,207 @@
+##################################
+# AH Virtual Network, NSG, Subnets
+##################################
+module "vnet" {
+  source = "./modules/network/Virtual_Network"
+
+  location                = data.azurerm_resource_group.rg.location
+  resource_group_name     = data.azurerm_resource_group.rg.name
+  networking_object       = local.vnet_config
+  tags                    = local.tags
+  log_analytics_workspace = local.log_analytics_workspace
+  diagnostics_map         = local.diagnostics_map
+  netwatcher              = local.netwatcher
+}
+
+
+#########################
+## Virtual Hub Connection
+#########################
+# Troubleshooting this issue of Hub Connection and will look at this later - TTaylor
+/*
+module "hub_connection" {
+  source     = "./modules/network/Virtual_Hub_Connection"
+  depends_on = [module.vnet]
+
+  vhub                      = local.vhub
+  remote_virtual_network_id = module.vnet.vnet_obj.id
+  vhub_conn_config          = local.hub_conn
+  routing                   = local.hub_conn.routing
+  propagated_route_table    = local.hub_conn.routing.propagated_route_table
+
+  providers = {
+    azurerm = azurerm.conn-sub
+  }
+}
+*/
+#########################
+## VNet Subnet Routing
+#########################
+
+
+#########################
+## Azure Key Vaults
+#########################
+## Common Key Vault
+module "common_key_vault" {
+  source = "./modules/keyvault/Key_Vault"
+
+  name                = local.common_kv_config.name
+  kv_config           = local.common_kv_config
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tags                = local.tags
+  network_acls        = local.common_kv_config.network_acls
+  #  access_policy       = local.common_kv_config.access_policy
+}
+
+## Service Key Vault
+module "service_key_vault" {
+  source = "./modules/keyvault/Key_Vault"
+
+  name                = local.service_kv_config.name
+  kv_config           = local.service_kv_config
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tags                = local.tags
+  network_acls        = local.service_kv_config.network_acls
+  #  access_policy       = local.service_kv_config.access_policy
+}
+
+
+#########################
+## Cosmos DB
+#########################
+module "cosmos_db" {
+  source = "./modules/cosmosdb/cosmos_db"
+
+  name                   = local.cosmosdb_account_name
+  offer_type             = var.cosmosdb_offer_type
+  resource_group_name    = data.azurerm_resource_group.rg.name
+  location               = data.azurerm_resource_group.rg.location
+  tags                   = local.tags
+  cosmosdb_sql_database  = var.cosmosdb_databases
+  failover_locations     = var.cosmosdb_failover_locations != null ? var.cosmosdb_failover_locations : local.default_failover_locations
+  cosmosdb_sql_container = var.cosmosdb_sql_container
+}
+module "cosmos_pe" {
+  source              = "./modules/network/Private_Endpoint"
+  depends_on          = [module.vnet]
+  subnet_id           = module.vnet.vnet_subnets[local.vnet_config.specialsubnets.pe_subnet.name]
+  private_endpoint    = local.cosmosdb_pe.private_endpoint
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  tags                = local.tags
+}
+#########################
+## Storage Account
+#########################
+module "storage" {
+  source              = "./modules/storage/storageAccount"
+  depends_on          = [module.adf]
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  storage_config      = local.storage_config
+  deploy_cmk          = local.deploy_cmk
+  tags                = local.tags
+  key_vault_name      = local.service_kv_config.name
+  key_vault_rg_name   = data.azurerm_resource_group.rg.name
+  network_rules       = var.storage_network_rule
+}
+
+
+#########################
+## Data Factory
+#########################
+
+module "adf" {
+  source = "./modules/datafactory/data_factory"
+
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  location             = data.azurerm_resource_group.rg.location
+  adf_configuration    = local.adf_configuration
+  tags                 = local.tags
+  cmk_configuration    = local.adf_cmk_configuration
+  # github_configuration = var.adf_github_configuration
+
+}
+
+module "adf_managed_private_endpoints" {
+  source = "./modules/datafactory/managed_private_endpoint"
+
+  managed_private_endpoint = local.managed_private_endpoint
+  data_factory_id          = module.adf.adf_obj.id
+}
+
+#########################
+## App Service Plan
+#########################
+## App Service Plan
+module "app_service_plan" { 
+   source = "./modules/appservice/app_service_plan"
+  name                       = var.plan_name
+  location                   = data.azurerm_resource_group.rg.location
+  resource_group_name        = data.azurerm_resource_group.rg.name
+  kind                       = var.kind
+  app_service_environment_id = var.app_service_environment_id
+  tags                       = local.tags
+
+  sku {
+    tier     = var.sku_tier
+    size     = var.sku_size
+    capacity = lookup(var.sku_cap, "capacity", null)
+  }
+}
+#########################
+## Function App
+#########################
+## Function APP
+module "function_app" {
+  source = "./modules/appservice/function_app"
+  name                       = var.functionappname
+  location                   = data.azurerm_resource_group.rg.location
+  resource_group_name        = data.azurerm_resource_group.rg.name
+  app_service_plan_id        = var.app_service_plan_id
+  https_only                 = var.https_only
+  storage_account_name       = var.storage_account_name
+  storage_account_access_key = var.storage_account_access_key
+  tags                       = local.tags
+
+ }
+##API Management
+module "apim" {
+  source = "./modules/apimanagement/apim"
+
+  api_name                = format("a%s-%s-%s", local.app_id, var.api_name, local.environment)
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  location             = data.azurerm_resource_group.rg.location
+  publisher_name      = var.publisher_name
+  publisher_email     = var.publisher_email
+  sku_name = var.sku_name
+  apim_name = format("a%s-%s-%s", local.app_id, var.apim_name, local.environment)
+  api_path  = var.api_path
+  api_service_url = var.api_service_url
+  content_value = var.content_value
+  api_is_versioned = var.api_is_versioned
+  api-versions = var.api-versions
+  api_display_name = var.api_display_name
+  subnet_id           = module.vnet.vnet_subnets[local.vnet_config.subnets.apim_subnet.name]
+}
+
+
+#########################
+## Application Gateway
+#########################
+## Internal App Gateway
+
+
+## External App Gateway
+
+
+############################
+## Front Door Frontend & WAF
+############################
+
+
